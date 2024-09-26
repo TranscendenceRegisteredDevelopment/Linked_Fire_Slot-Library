@@ -4,3 +4,4 @@ _*
 *.xml~
 **/*.xml~
 **/*conflicted copy*.*
+*.exe
