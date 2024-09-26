@@ -18,7 +18,7 @@
 		<!-- Define the list we need -->
 		<List>
 			 (block (slotList pickerList)
-			 	(setq slotList (TSB_shpGetSlotList gSource))
+			 	(setq slotList (LFS_shpGetSlotList gSource))
 			 	;;translate the slotlist into the (list ... (list 'name 'pic 'desc) ...) list that this needs
 			 	(setq pickerList (list))
 			 	(enum slotList slot
@@ -68,7 +68,7 @@
 			 					;;construct a description string
 			 					"Currently equipped item: "
 			 					(if (not (eq (item slot 0) 'Default))
-			 						(if (and (item slot 11) (TSB_objHasItem gSource (item slot 11)))
+			 						(if (and (item slot 11) (LFS_objHasItem gSource (item slot 11)))
 			 							(itmGetName (item slot 11) (add 1 4))
 			 							"No Item equipped"
 			 						)
@@ -121,7 +121,7 @@
 						(block (theSlot)
 							(setq theSlot (scrGetListEntry gScreen))
 							(objSetData gSource 'LFS_selectedSlot (item theSlot 3));;save the slot list in here for the next dockscreen
-							;;(if theItem (TSB_shpInstallItemToSlot gSource theItem 'Left))
+							;;(if theItem (LFS_shpInstallItemToSlot gSource theItem 'Left))
 							;;(scrEnableAction gScreen 1 True)
 							(scrShowScreen gScreen &LFS_dsEquipItem;)
 						)
@@ -171,7 +171,7 @@
 					<Action name="Equip Item" default="1" key="E">
 						(block (theItem)
 							(setq theItem (scrGetItem gScreen))
-							(if theItem (TSB_shpInstallItemToSlot gSource theItem (item (objGetData gSource 'LFS_selectedSlot) 0)))
+							(if theItem (LFS_shpInstallItemToSlot gSource theItem (item (objGetData gSource 'LFS_selectedSlot) 0)))
 							(scrShowScreen gScreen &LFS_dsEquip;)
 						)
 					</Action>

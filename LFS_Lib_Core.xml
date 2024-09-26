@@ -24,21 +24,17 @@
 	<!ENTITY LFS_rsSlotLnkOmni				"0xA00313E8">
 	
 	<!-- EXTERNAL -->
-	<!ENTITY TSB_unidTSBFunctionLibrary			"0xA00A0002">
 ]>
 
 <TranscendenceLibrary
 	name="Transcendence Linked-Fire Slot Library"
-	credits="Wolfy"
+	credits="Arisaya"
 	UNID="&LFS_unidLFSLib;"
-	release="1"
-	version="1.0.0.0"
+	release="2"
+	version="1.1.0.0"
 	apiVersion="22">
 
 <!-- LIBRARIES -->
-
-	<Library unid="&TSB_unidTSBFunctionLibrary;"/>
-	
 	
 <!-- MODULES -->
 
@@ -50,6 +46,354 @@
 <!-- GLOBALS -->
 
 	<Globals>
+	(block Nil
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;=============================================================
+		;;define a device slot
+		;;-------------------------------------------------------------
+		;;parameters for each value are:
+		;;-------------------------------------------------------------
+		;;name -		string,		unique name identifier for this slot
+		;;
+		;;posAngle - 		int, 		polar angle coordinate of slot
+		;;posRadius - 		int, 		radius coordinate of slot
+		;;posZ - 		int, 		euclidian vertical offset of slot
+		;;omniTF - 		boolean, 	if is omni (overrides pivot selection)
+		;;pivotTF - 		boolean, 	if has a pivot (requires non-nil arcs if true)
+		;;fireArcMin - 		int, 		min arc angle of pivoting slot
+		;;fireArcMax - 		int, 		max arc angle of pivoting slot
+		;;LinkedFirOption - 	string, 	one of the following:
+		;;	'always - 			always shoots when player shoots (use for fixed weapons)
+		;;	'whenInFireArc - 		only shoots when a target is in the firearc
+		;;	'targetInRange - 		only shoots when a target is in the radius of fire (use for homing and omni weapons)
+		;;secondaryTF - 	boolean,	if this slot is a secondary slot (used for NPCs)
+		;;
+		;;critereonList -	list,		list of options (see below) the restrict what can be added. Nil is assumed to be "*"
+		;;-------------------------------------------------------------
+		;;options for the critereon list:
+		;;() or Nil -		Assumed to be "*" (any item)
+		;;('string) -		An item criteria string (like "w^I")
+		;;('string lambda) - 	An item criteria string (if Nil assumed to be "*") with an additional lambda that takes an object and an item as its argument and returns a boolean value (True means ok to install, Nil means not ok)
+		;;(Nil Nil) - 		Default slot (acts as "*" but allows any item to be dumped there if its slot gets taken)
+		;;
+		(setq LFS_shpSetItemPosition (lambda (object item posRadius posAngle posZ omniTF pivotTF fireArcMin fireArcMax LinkedFireOption secondaryTF)
+			(block Nil
+				(objSetItemProperty object item 'pos (list posAngle posRadius posZ))
+				(if (not omniTF)
+					(if (not pivotTF)
+						(objSetItemProperty object item 'fireArc Nil)
+						(objSetItemProperty object item 'fireArc (list fireArcMin fireArcMax))
+					)
+					(objSetItemProperty object item 'fireArc 'omnidirectional)
+				)
+				(if (not (eq Nil LinkedFireOption))
+					(objSetItemProperty object item 'linkedFireOptions (list LinkedFireOption))
+					(objSetItemProperty object item 'linkedFireOptions Nil)
+				)
+				(objSetItemProperty object item 'secondary secondaryTF)
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;;=============================================================
+		;;define a device slot
+		;;-------------------------------------------------------------
+		;;parameters for each value are:
+		;;-------------------------------------------------------------
+		;;object -		obj,		the object that owns this slot
+		;;slotName -		string,		unique name identifier for this slot
+		;;
+		;;posRadius - 		int, 		radius coordinate of slot
+		;;posAngle - 		int, 		polar angle coordinate of slot
+		;;posZ - 		int, 		euclidian vertical offset of slot
+		;;omniTF - 		boolean, 	if is omni (overrides pivot selection)
+		;;pivotTF - 		boolean, 	if has a pivot (requires non-nil arcs if true)
+		;;fireArcMin - 		int, 		min arc angle of pivoting slot
+		;;fireArcMax - 		int, 		max arc angle of pivoting slot
+		;;LinkedFirOption - 	string, 	one of the following:
+		;;	'always - 			always shoots when player shoots (use for fixed weapons)
+		;;	'whenInFireArc - 		only shoots when a target is in the firearc
+		;;	'targetInRange - 		only shoots when a target is in the radius of fire (use for homing and omni weapons)
+		;;secondaryTF - 	boolean,	if this slot is a secondary slot (used for NPCs)
+		;;
+		;;critereonList -	list,		list of options (see below) the restrict what can be added. Nil is assumed to be "*"
+		;;-------------------------------------------------------------
+		;;options for the critereon list:
+		;;() or Nil -		Assumed to be "*" (any item)
+		;;('string) -		An item criteria string (like "w^I")
+		;;('string lambda) - 	An item criteria string (if Nil assumed to be "*") with an additional lambda that takes an object and an item as its argument and returns a boolean value (True means ok to install, Nil means not ok)
+		;;(Nil Nil) - 		Default slot (acts as "*" but allows any item to be dumped there if its slot gets taken)
+		;;
+		(setq LFS_shpDefineDeviceSlot (lambda (object slotName posRadius posAngle posZ omniTF pivotTF fireArcMin fireArcMax LinkedFireOption secondaryTF critereonList)
+			(block (slotList)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				(if (eq Nil slotList) (setq slotList (list)))
+				(lnkAppend slotList (list slotName posRadius posAngle posZ omniTF pivotTF fireArcMin fireArcMax LinkedFireOption secondaryTF critereonList Nil))
+				(objSetData object 'LFS_slotManagerDeviceSlotList slotList)
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpAddDefaultSlot (lambda (object)
+			(block (slotList)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				(if (eq Nil slotList) (setq slotList (list)))
+				(lnkAppend slotList LFS_lstDefaultSlot)
+				(objSetData object 'LFS_slotManagerDeviceSlotList slotList)
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpGetDeviceSlot (lambda (object slotName)
+			(block (slotList slot)
+				(setq slot Nil)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				(if (eq Nil slotList)
+					(block Nil (setq slotList (list)) (setq slot Nil))
+					(enumWhile slotList (eq slot Nil) curSlot
+						(if (eq (item curSlot 0) slotName) (setq slot curSlot))
+					)
+				)
+				slot
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpGetSlotWithDevice (lambda (object item)
+			(block (slotList slot)
+				(setq slot Nil)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				;;(dbglog "SL:")
+				;;(dbglog slotList)
+				;;(dbglog "I:")
+				;;(dbglog item)
+				(if (eq Nil slotList)
+					(block Nil (setq slotList (list)) (setq slot Nil))
+					(enumWhile slotList (eq slot Nil) curSlot
+						(if (eq (item curSlot 11) item) (setq slot curSlot))
+					)
+				)
+				slot
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		;;Constant declairation of the criteria list for the default slot
+		(setq LFS_lstDefaultSlotCriteria (list Nil Nil))
+		;;Constant declairation of the default slot
+		(setq LFS_lstDefaultSlot (list 'Default 20 0 0 Nil Nil 0 0 Nil Nil LFS_lstDefaultSlotCriteria Nil))
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpGetDefaultSlot (lambda (object)
+			(block (slotList slot)
+				(setq slot Nil)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				(if (eq Nil slotList)
+					(block Nil (setq slotList (list)) (setq slot Nil))
+					(enumWhile slotList (eq slot Nil) curSlot
+						(if (eq (item curSlot 10) (list Nil Nil)) (setq slot curSlot))
+					)
+				)
+				slot
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpGetSlotList (lambda (object) 
+			(objGetData object 'LFS_slotManagerDeviceSlotList)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_objHasItem (lambda (object item)
+			(block (itemList ret)
+				(setq itemList (append (objGetItems object "*") (objGetItems object "*^V")))
+				(setq ret Nil)
+				(enumWhile itemList (eq ret Nil) itm
+					(if (eq itm item) (setq ret True))
+				)
+				ret
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpInstallItemToSlot (lambda (object item slotName)
+			(block (oldItem slot defSlot ret oldSlot canInstall installCheck)
+				(setq defSlot (LFS_shpGetDefaultSlot object))
+				(setq slot (LFS_shpGetDeviceSlot object slotName))
+				(setq oldSlot (LFS_shpGetSlotWithDevice object item))
+				(setq installCheck (item slot 10))
+				(setq canInstall Nil)
+				;;(if (eq oldSlot Nil) (plyMessage gPlayer 'OSNil))
+				;;(if (eq defSlot Nil) (plyMessage gPlayer 'DSNil))
+				;;(dbglog oldSlot)
+				(setq oldItem Nil)
+				;;check to see if its legal to install it
+				(if (or (eq installCheck Nil) (eq installCheck (list)) (eq installCheck (list Nil Nil)) (eq installCheck (list Nil)))
+					(setq canInstall True)
+					(block (criteriaString criteriaLambda)
+						(if (eq (item installCheck 0) Nil)
+							(setq criteriaString "*")
+							(setq criteriaString (item installCheck 0))
+						)
+						(if (eq (count installCheck) 1)
+							(setq criteriaLambda (lambda (obj itm) True))
+							(setq criteriaLambda (item installCheck 1))
+						)
+						(dbglog criteriaLambda)
+						(dbglog installCheck)
+						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; TEMPORARY ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+							(setq criteriaLambda (lambda (obj itm) True))
+						(if (and (itmMatches item criteriaString) (criteriaLambda object item))
+							(setq canInstall True)
+							(setq canInstall Nil)
+						)
+					)
+				)
+				(if canInstall
+					(if (eq slot Nil)
+						(dbglog (cat "LFS_shpInstallItemToSlot " slotName " is not a valid slot name"))
+						(block Nil
+							(setq oldItem (item slot 11))
+							;;(dbglog "OItem:")
+							;;(dbglog oldItem)
+							;;(dbglog "DefSlot:")
+							;;(dbglog defSlot)
+							(if (and oldItem (LFS_objHasItem object oldItem)) ;;need to remove the old item
+								(block Nil
+									(if defSlot
+										(LFS_shpSetItemInSlot object oldItem defSlot)
+										(LFS_shpSetItemInDefaultSlot object item)
+									)
+								)
+							)
+							;;now install the item and set it as the one in that slot
+							(if oldSlot
+								(LFS_shpReplaceSlot object (lnkReplace oldSlot 11 Nil))
+							)
+							(LFS_shpReplaceSlot object (lnkReplace slot 11 item));;UPDATE THE OLD LIST WITH THE NEW ONE
+							(LFS_shpSetItemInSlot object item slot)
+						)
+					)
+					Nil;; return nil because the item did not match the slot criteria
+				)
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpReplaceSlot (lambda (object newSlot) ;; replaces a slot with updated version of itself based on slot name
+			(block (slotList slotName idx found)
+				(setq slotList (objGetData object 'LFS_slotManagerDeviceSlotList))
+				(setq slotName (item newSlot 0))
+				;;Find the slot and its index
+				(setq found Nil)
+				(setq idx 0)
+				(enumWhile slotList (not found) curSlot
+					(if (eq (item curSlot 0) slotName) (setq found True) (setq idx (add idx 1)))
+				)
+				(setq slotList (lnkReplace slotList idx newSlot))
+				(objSetData object 'LFS_slotManagerDeviceSlotList slotList)
+			)
+		));;setq and lambda
+		
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpSetItemInDefaultSlot (lambda (object item)
+			(LFS_shpSetItemPosition
+				object
+				item
+				
+				20;;default slot is at 20 radius in front
+				0;;in front of ship
+				0;;no height offset
+				Nil;;standard slot
+				Nil;;standard slot
+				0;;standard slot
+				0;;standard slot
+				(list);;not linked
+				Nil;;primary
+			)
+		));;
+		
+		
+		
+		
+		
+		
+		(setq LFS_shpSetItemInSlot (lambda (object item slotDataList)
+			(LFS_shpSetItemPosition
+				object
+				item
+				;;list item 0 is the name
+				(item slotDataList 1);rad
+				(item slotDataList 2);ang
+				(item slotDataList 3);z
+				(item slotDataList 4);omni
+				(item slotDataList 5);pivot
+				(item slotDataList 6);arcMin
+				(item slotDataList 7);arcMax
+				(item slotDataList 8);linkedFire
+				(item slotDataList 9);secondary
+				;;list item 10 is the critereonlist
+				;;list item 11 is the currently installed item struct
+			)
+		));;setq and lambda
+	)
 	</Globals>
 
 </TranscendenceLibrary>
